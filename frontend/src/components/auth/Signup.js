@@ -11,22 +11,23 @@ function Signup({ setIsAuthenticated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('http://127.0.0.1:5000/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
-
+  
       if (response.ok) {
-        setIsAuthenticated(true);
-        navigate('/');
+        console.log('Signup successful');
       } else {
         const data = await response.json();
-        setError(data.message);
+        console.error('Signup failed:', data.message);
       }
     } catch (error) {
-      setError('Signup failed. Please try again.');
+      console.error('Network error:', error);
     }
   };
 

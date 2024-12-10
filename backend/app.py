@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, make_response, g
+from flask_cors import CORS
 from functools import wraps
 import sqlite3
 import random
@@ -7,6 +8,7 @@ import bcrypt
 import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
 # Database operations
 def get_db():
@@ -39,11 +41,11 @@ def generate_session_token():
 def auth_required(f):
     @wraps(f) 
     def decorated(*args, **kwargs):
-        session_token = request.cookies.get('session_token')  # Get session token from cookies
-        if not session_token:
+        auth_token = request.cookies.get('auth_token')  # Get session token from cookies
+        if not auth_token:
             return jsonify({'message': 'No session token provided'}), 401
         
-        user = query_db('SELECT * FROM users WHERE session_token = ?', [session_token], one=True)
+        user = query_db('SELECT * FROM users WHERE auth_token = ?', [auth_token], one=True)
         if not user:
             return jsonify({'message': 'Invalid session token'}), 401
                 
@@ -55,7 +57,15 @@ def auth_required(f):
 #################
 # User profile operations
 #################
-@app.route('/api/auth/signup', methods=['POST'])
+
+@app.route('/api/auth/signup', methods=['OPTIONS', 'POST'])
+def signup_options():
+    if request.method == 'OPTIONS':
+        return '', 204
+
+    return signup() 
+
+@app.route('/api/auth/signup', methods=['OPTIONS'])
 def signup():
     data = request.get_json()
     username = data.get('username')
@@ -69,16 +79,16 @@ def signup():
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         # Generate session token
-        session_token = generate_session_token()
+        auth_token = generate_session_token()
         
         # Insert new user with hashed password and session token
         query_db(
-            'INSERT INTO users (username, password, session_token) VALUES (?, ?, ?)',
-            [username, hashed_password.decode('utf-8'), session_token]
+            'INSERT INTO users (username, password, auth_token) VALUES (?, ?, ?)',
+            [username, hashed_password.decode('utf-8'), auth_token]
         )
         
         resp = jsonify({'message': 'Signup successful'})
-        resp.set_cookie('session_token', session_token)  # Set session token in cookie
+        resp.set_cookie('auth_token', auth_token)  # Set session token in cookie
         return resp, 201
         
     except sqlite3.IntegrityError:
@@ -98,11 +108,11 @@ def login():
     
     # Check if user exists and validate password
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-        session_token = generate_session_token()  # Generate a new session token
-        query_db('UPDATE users SET session_token = ? WHERE id = ?', [session_token, user['id']])  # Update session token in the database
+        auth_token = generate_session_token()  # Generate a new session token
+        query_db('UPDATE users SET auth_token = ? WHERE id = ?', [auth_token, user['id']])  # Update session token in the database
         
         resp = jsonify({'message': 'Login successful'})
-        resp.set_cookie('session_token', session_token)  # Set session token in cookie
+        resp.set_cookie('auth_token', auth_token)  # Set session token in cookie
         return resp, 200
     
     return jsonify({'message': 'Invalid credentials'}), 401
@@ -130,9 +140,9 @@ def update_profile(user_id):
 @app.route('/api/auth/logout', methods=['POST'])
 @auth_required
 def logout(user_id):
-    query_db('UPDATE users SET session_token = NULL WHERE id = ?', [user_id])  # Clear the session token in the database
+    query_db('UPDATE users SET auth_token = NULL WHERE id = ?', [user_id])  # Clear the session token in the database
     resp = jsonify({'message': 'Logout successful'})
-    resp.set_cookie('session_token', '', expires=0)  # Clear the session token cookie
+    resp.set_cookie('auth_token', '', expires=0)  # Clear the session token cookie
     return resp, 200
 
 #################
