@@ -1,28 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import MessageItem from './MessageItem';
 import '../../styles/messages.css';
 
-function MessageList({ channelId }) {
-  const [messages, setMessages] = useState([]);
+function MessageList({ messages = [], channelId }) {
+  // Add debug logs
+  console.log('MessageList render:', { 
+    messagesCount: messages.length, 
+    messages: messages,
+    channelId 
+  });
 
-  // Poll for new messages
-  useEffect(() => {
-    const pollMessages = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/channels/${channelId}/messages`, {
-          credentials: 'include'
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data);
-        }
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      }
-    }, 500);
-
-    return () => clearInterval(pollMessages);
-  }, [channelId]);
+  if (!messages.length) {
+    return (
+      <div className="message-list empty">
+        <p>No messages yet. Start the conversation!</p>
+      </div>
+    );
+  }
 
   return (
     <div className="message-list">

@@ -13,21 +13,21 @@ function Signup({ setIsAuthenticated }) {
     try {
       const response = await fetch('http://127.0.0.1:5000/api/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ username, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
-  
+
+      const data = await response.json();
+
       if (response.ok) {
-        console.log('Signup successful');
+        localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
+        setIsAuthenticated(true);
+        navigate('/');
       } else {
-        const data = await response.json();
-        console.error('Signup failed:', data.message);
+        setError(data.message);
       }
     } catch (error) {
-      console.error('Network error:', error);
+      setError('Signup failed. Please try again.');
     }
   };
 

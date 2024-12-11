@@ -1,20 +1,14 @@
 import React from 'react';
 import Header from './Header';
 import ChannelList from '../channels/ChannelList';
-import { useLocation } from 'react-router-dom';
-import '../../styles/layout.css';
 
-function Layout({ children }) {
-  const location = useLocation();
-  const isMobile = window.innerWidth <= 768;
-  const showChannelList = !isMobile || !location.pathname.includes('/channels/');
-
+function Layout({ children, setIsAuthenticated }) {
   return (
-    <div className="layout">
-      <Header />
-      <div className="main-container">
-        {showChannelList && <ChannelList />}
-        <main className="content">
+    <div className="app-container">
+      <Header setIsAuthenticated={setIsAuthenticated} />
+      <div className="main-content">
+        <ChannelList />
+        <main className="channel-content">
           {children}
         </main>
       </div>

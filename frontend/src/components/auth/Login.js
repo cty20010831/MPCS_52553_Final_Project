@@ -13,24 +13,29 @@ function Login({ setIsAuthenticated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ username, password })
-      });
+        const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
 
-      if (response.ok) {
-        setIsAuthenticated(true);
-        navigate(from);
-      } else {
-        const data = await response.json();
-        setError(data.message);
-      }
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Login response:', data); // Debug log
+            localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
+            localStorage.setItem('tianyuec_belay_username', data.username);
+            console.log('Stored username:', localStorage.getItem('tianyuec_belay_username')); // Debug log
+            setIsAuthenticated(true);
+            navigate('/', { replace: true });
+        } else {
+            setError('Invalid credentials');
+        }
     } catch (error) {
-      setError('Login failed. Please try again.');
+        setError('Login failed');
     }
-  };
+};
 
   return (
     <div className="auth-container">

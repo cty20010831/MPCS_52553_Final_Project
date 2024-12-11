@@ -1,85 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { authFetch } from '../../utils/api';
 import NewChannel from './NewChannel';
 import '../../styles/channels.css';
 
 function ChannelList() {
   const [channels, setChannels] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [error, setError] = useState(null);
   const { channelId } = useParams();
-  const [showNewChannel, setShowNewChannel] = useState(false);
 
   // Fetch channels
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        const response = await fetch('/api/channels', {
-          credentials: 'include'
-        });
+        const response = await authFetch('http://127.0.0.1:5000/api/channels');
         if (response.ok) {
           const data = await response.json();
           setChannels(data);
         }
       } catch (error) {
         console.error('Error fetching channels:', error);
+        setError('Failed to load channels');
       }
     };
+
     fetchChannels();
+    const channelsPollInterval = setInterval(fetchChannels, 500);
+    return () => clearInterval(channelsPollInterval);
   }, []);
 
-  // Poll for unread counts
+  // Fetch unread counts
   useEffect(() => {
-    const pollUnread = setInterval(async () => {
+    const fetchUnreadCounts = async () => {
       try {
-        const response = await fetch('/api/channels/unread', {
-          credentials: 'include'
-        });
+        const response = await authFetch('http://127.0.0.1:5000/api/channels/unread');
         if (response.ok) {
           const data = await response.json();
-          setUnreadCounts(data);
+          const counts = {};
+          data.forEach(item => {
+            counts[item.channel_id] = item.unread_count;
+          });
+          setUnreadCounts(counts);
         }
       } catch (error) {
         console.error('Error fetching unread counts:', error);
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(pollUnread);
-  }, []);
+    fetchUnreadCounts();
+    const unreadPollInterval = setInterval(fetchUnreadCounts, 5000);
+    return () => clearInterval(unreadPollInterval);
+  }, [channelId]); // Update when channel changes
+
+  const handleNewChannel = (newChannel) => {
+    setChannels(prev => [...prev, newChannel]);
+  };
 
   return (
     <div className="channel-list">
-      <div className="channel-header">
+      <div className="channels-header">
         <h2>Channels</h2>
-        <button 
-          className="new-channel-button"
-          onClick={() => setShowNewChannel(true)}
-        >
-          +
-        </button>
+        <NewChannel onChannelCreated={handleNewChannel} />
       </div>
 
-      {channels.map(channel => (
-        <Link
-          key={channel.id}
-          to={`/channels/${channel.id}`}
-          className={`channel-item ${channel.id === parseInt(channelId) ? 'active' : ''}`}
-        >
-          <span className="channel-name"># {channel.name}</span>
-          {unreadCounts[channel.id] > 0 && (
-            <span className="unread-badge">{unreadCounts[channel.id]}</span>
-          )}
-        </Link>
-      ))}
+      {error && <div className="error-message">{error}</div>}
 
-      {showNewChannel && (
-        <NewChannel 
-          onClose={() => setShowNewChannel(false)}
-          onChannelCreated={(newChannel) => {
-            setChannels([...channels, newChannel]);
-            setShowNewChannel(false);
-          }}
-        />
-      )}
+      <ul>
+        {channels.map(channel => (
+          <li key={channel.id} className={channel.id === parseInt(channelId) ? 'active' : ''}>
+            <Link to={`/channels/${channel.id}`}>
+              # {channel.name}
+              {unreadCounts[channel.id] > 0 && (
+                <span className="unread-badge">{unreadCounts[channel.id]}</span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
