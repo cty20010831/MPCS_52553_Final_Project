@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { authFetch } from '../../utils/api';
+import { toast } from 'react-toastify';
 import MessageInput from '../messages/MessageInput';
 import MessageList from '../messages/MessageList';
 import '../../styles/channels.css';
 
 function ChannelView() {
   const { channelId } = useParams();
+  const navigate = useNavigate();
   const [channel, setChannel] = useState(null);
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
@@ -21,6 +23,7 @@ function ChannelView() {
         if (response.ok) {
           const data = await response.json();
           setChannel(data);
+          document.title = `#${data.name} - Belay`;
         }
       } catch (error) {
         console.error('Error fetching channel:', error);
@@ -29,7 +32,34 @@ function ChannelView() {
     };
 
     fetchChannel();
-  }, [channelId]);
+
+    // Listen for channel name updates
+    const handleChannelUpdate = (event) => {
+      if (event.detail.channelId === parseInt(channelId)) {
+        setChannel(prev => ({
+          ...prev,
+          name: event.detail.newName
+        }));
+        document.title = `#${event.detail.newName} - Belay`;
+      }
+    };
+
+    // Listen for channel deletion
+    const handleChannelDelete = (event) => {
+      if (event.detail.channelId === parseInt(channelId)) {
+        toast.info('This channel has been deleted');
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('channelDeleted', handleChannelDelete);
+    window.addEventListener('channelNameUpdated', handleChannelUpdate);
+
+    return () => {
+      window.removeEventListener('channelDeleted', handleChannelDelete);
+      window.removeEventListener('channelNameUpdated', handleChannelUpdate);
+    };
+  }, [channelId, navigate]);
 
   // Mark channel as read when entering and periodically
   useEffect(() => {
@@ -113,7 +143,7 @@ function ChannelView() {
   return (
     <div className="channel-view">
       <div className="channel-header">
-        <h2>{channel ? `#${channel.name}` : 'Loading...'}</h2>
+        <h2>#{channel?.name}</h2>
         {error && <div className="error-message">{error}</div>}
       </div>
 

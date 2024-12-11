@@ -23,6 +23,14 @@ function ReplyThread() {
         if (response.ok) {
           const data = await response.json();
           setParentMessage(data);
+          document.title = `Thread: ${data.content.substring(0, 30)}... - Belay`;
+          navigate(`/channels/${channelId}/thread/${messageId}`, {
+            replace: true,
+            state: { 
+              parentMessageContent: data.content,
+              channelId: channelId
+            }
+          });
         }
       } catch (error) {
         console.error('Error fetching parent message:', error);
@@ -49,7 +57,7 @@ function ReplyThread() {
     fetchReplies();
     const pollInterval = setInterval(fetchReplies, 500);
     return () => clearInterval(pollInterval);
-  }, [channelId, messageId]);
+  }, [channelId, messageId, navigate]);
 
   if (!channelId || !messageId) {
     return <div>Invalid thread</div>;

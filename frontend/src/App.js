@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './components/auth/Login';
 import Signup from './components/auth/Signup';
 import Layout from './components/layout/Layout';
@@ -9,7 +9,9 @@ import './styles/layout.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function App() {
+// Separate component to handle location-based effects
+function AppContent() {
+  const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem('tianyuec_belay_auth_token')
   );
@@ -18,43 +20,60 @@ function App() {
     console.log('Auth state changed:', isAuthenticated);
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    // Update document title based on route and state
+    if (location.pathname === '/') {
+      document.title = 'Belay';
+    } else if (location.state?.channelName) {
+      document.title = `#${location.state.channelName} - Belay`;
+    } else if (location.state?.parentMessageContent) {
+      document.title = `Thread: ${location.state.parentMessageContent.substring(0, 30)}... - Belay`;
+    }
+  }, [location]);
+
+  return (
+    <Routes>
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated ? 
+            <Navigate to="/" replace /> : 
+            <Login setIsAuthenticated={setIsAuthenticated} />
+        } 
+      />
+      <Route 
+        path="/signup" 
+        element={
+          isAuthenticated ? 
+            <Navigate to="/" replace /> : 
+            <Signup setIsAuthenticated={setIsAuthenticated} />
+        } 
+      />
+      <Route
+        path="/*"
+        element={
+          isAuthenticated ? (
+            <Layout setIsAuthenticated={setIsAuthenticated}>
+              <Routes>
+                <Route path="/channels/:channelId" element={<ChannelView />} />
+                <Route path="/channels/:channelId/thread/:messageId" element={<ReplyThread />} />
+                <Route path="/" element={<div className="welcome-message">Select a channel to start messaging</div>} />
+              </Routes>
+            </Layout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+    </Routes>
+  );
+}
+
+function App() {
   return (
     <>
       <BrowserRouter>
-        <Routes>
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/" replace /> : 
-                <Login setIsAuthenticated={setIsAuthenticated} />
-            } 
-          />
-          <Route 
-            path="/signup" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/" replace /> : 
-                <Signup setIsAuthenticated={setIsAuthenticated} />
-            } 
-          />
-          <Route
-            path="/*"
-            element={
-              isAuthenticated ? (
-                <Layout setIsAuthenticated={setIsAuthenticated}>
-                  <Routes>
-                    <Route path="/channels/:channelId" element={<ChannelView />} />
-                    <Route path="/channels/:channelId/thread/:messageId" element={<ReplyThread />} />
-                    <Route path="/" element={<div className="welcome-message">Select a channel to start messaging</div>} />
-                  </Routes>
-                </Layout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-        </Routes>
+        <AppContent />
       </BrowserRouter>
       <ToastContainer 
         position="top-right"

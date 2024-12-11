@@ -158,6 +158,7 @@ function MessageItem({ message, channelId, isReply = false }) {
               title={`Reacted by:\n${reaction.users ? reaction.users.join('\n') : 'No users yet'}`}
             >
               {reaction.emoji} {reaction.count}
+              <span className="delete-x">✕</span>
             </button>
           ))}
         </div>

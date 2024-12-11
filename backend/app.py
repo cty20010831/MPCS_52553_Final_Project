@@ -522,6 +522,47 @@ def mark_channel_read(user_id, channel_id):
         print(f"Error marking channel as read: {e}")
         return jsonify({'error': 'Failed to mark channel as read'}), 500
 
+# Update channel
+@app.route('/api/channels/<int:channel_id>', methods=['OPTIONS', 'PUT'])
+@handle_options
+@auth_required
+def update_channel(user_id, channel_id):
+    data = request.get_json()
+    new_name = data.get('name')
+    
+    if not new_name:
+        return jsonify({'message': 'Channel name is required'}), 400
+        
+    # Check if user has permission (optional)
+    channel = query_db('SELECT * FROM channels WHERE id = ?', [channel_id], one=True)
+    if not channel:
+        return jsonify({'message': 'Channel not found'}), 404
+        
+    # Update channel name
+    query_db('''
+        UPDATE channels 
+        SET name = ? 
+        WHERE id = ?
+    ''', [new_name, channel_id])
+    
+    return jsonify({'message': 'Channel updated successfully'}), 200
+
+# Delete channel
+@app.route('/api/channels/<int:channel_id>', methods=['OPTIONS', 'DELETE'])
+@handle_options
+@auth_required
+def delete_channel(user_id, channel_id):
+    try:
+        # Delete all related data first
+        query_db('DELETE FROM message_reads WHERE channel_id = ?', [channel_id])
+        query_db('DELETE FROM reactions WHERE message_id IN (SELECT id FROM messages WHERE channel_id = ?)', [channel_id])
+        query_db('DELETE FROM messages WHERE channel_id = ?', [channel_id])
+        query_db('DELETE FROM channels WHERE id = ?', [channel_id])
+        
+        return jsonify({'message': 'Channel deleted successfully'}), 200
+    except Exception as e:
+        print(f"Error deleting channel: {e}")
+        return jsonify({'message': 'Failed to delete channel'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

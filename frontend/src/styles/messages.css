@@ -131,8 +131,76 @@
   align-items: center;
   gap: 4px;
   transition: all 0.2s ease;
+  position: relative;
 }
 
+/* Tooltip on hover */
+.reaction-badge[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: pre-line;
+  z-index: 1000;
+  margin-top: 8px;
+  width: max-content;
+  max-width: 200px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  animation: fadeInOut 2s forwards;
+}
+
+/* Tooltip arrow */
+.reaction-badge[title]:hover::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.8);
+  margin-top: -4px;
+  z-index: 1000;
+  animation: fadeInOut 2s forwards;
+}
+
+/* Delete X styling */
+.delete-x {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.reaction-badge:hover .delete-x {
+  opacity: 1;
+}
+
+/* Animation for fade in/out */
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Hover background effect */
 .reaction-badge:hover {
   background-color: #e3e3e3;
   border-color: #d0d0d0;
@@ -182,7 +250,7 @@
 /* Reaction Picker */
 .reaction-picker {
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 0;
   background-color: white;
   border: 1px solid #e3e3e3;
@@ -192,7 +260,7 @@
   gap: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  margin-bottom: 4px;
+  margin-top: 4px;
 }
 
 .reaction-option {
@@ -201,7 +269,7 @@
   padding: 4px;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s;
   font-size: 16px;
 }
 
@@ -330,28 +398,6 @@
   padding: 4px 8px;
   background-color: rgba(220, 53, 69, 0.1);
   border-radius: 4px;
-}
-
-/* Tooltip styling */
-[title] {
-  position: relative;
-}
-
-[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: pre-line;
-  z-index: 1000;
-  max-width: 200px;
-  margin-bottom: 8px;
 }
 
 /* Scrollbar Styling */
