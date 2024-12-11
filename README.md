@@ -13,6 +13,23 @@ our own (significantly smaller in scope) version of the popular workplace
 messaging app Slack. We'll call our version
 [Belay](https://en.wikipedia.org/wiki/Belaying).
 
+## Running Belay
+In order to run Belay, you must first run the backend and then the frontend. It is suggested to split the terminal into two separate tabs (one for the backend and one for the frontend). 
+
+To run the backend, navigate to the backend directory and run the following command:
+```
+cd backend
+flask run
+```
+
+To run the frontend, navigate to the frontend directory and run the following command:
+```
+cd frontend
+npm start
+```
+
+If everything is set up correctly, you should be able to access the app at `http://127.0.0.1:3000`.
+
 ## Core Behavior
 
 - Belay lets users send and read real-time chat messages that are organized into
@@ -177,20 +194,3 @@ Narrow Screens:
   read message in a channel
 - Create an endpoint to return unread message counts for the user for each channel in a
   single request with a single database query
-
-## Running Belay
-In order to run Belay, you must first run the backend and then the frontend. It is suggested to split the terminal into two separate tabs (one for the backend and one for the frontend). 
-
-To run the backend, navigate to the backend directory and run the following command:
-```
-cd backend
-flask run
-```
-
-To run the frontend, navigate to the frontend directory and run the following command:
-```
-cd frontend
-npm start
-```
-
-If everything is set up correctly, you should be able to access the app at `http://127.0.0.1:3000`.
