@@ -133,25 +133,34 @@ function ChannelView() {
     }
 
     return (
-        <div className="channel-view">
-            <div className="channel-header">
-                <h2>#{channel?.name}</h2>
-            </div>
-            <MessageList 
-                messages={messages} 
-                channelId={channelId}
-                onReplyClick={handleReplyClick}
-            />
-            <MessageInput 
-                onSendMessage={handleNewMessage} 
-                channelId={channelId}
-            />
-            {selectedMessageId && (
-                <ReplyThread
+        <div className="content">
+            <div className="channel-messages">
+                <div className="channel-header">
+                    <h2>#{channel?.name}</h2>
+                </div>
+                <MessageList 
+                    messages={messages} 
                     channelId={channelId}
-                    messageId={selectedMessageId}
-                    onClose={handleCloseThread}
+                    onReplyClick={handleReplyClick}
                 />
+                <MessageInput 
+                    onSendMessage={handleNewMessage} 
+                    channelId={channelId}
+                />
+            </div>
+            
+            {selectedMessageId && (
+                <div className="thread-panel">
+                    <div className="thread-header">
+                        <h3>Thread</h3>
+                        <button onClick={handleCloseThread}>Close</button>
+                    </div>
+                    <ReplyThread
+                        channelId={channelId}
+                        messageId={selectedMessageId}
+                        onClose={handleCloseThread}
+                    />
+                </div>
             )}
         </div>
     );

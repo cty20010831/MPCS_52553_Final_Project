@@ -2,13 +2,7 @@ import React from 'react';
 import MessageItem from './MessageItem';
 import '../../styles/messages.css';
 
-function MessageList({ messages = [], channelId }) {
-  // Add debug logs
-  console.log('MessageList render:', { 
-    messagesCount: messages.length, 
-    messages: messages,
-    channelId 
-  });
+function MessageList({ messages = [], channelId, onReplyClick }) {
 
   if (!messages.length) {
     return (
@@ -25,6 +19,7 @@ function MessageList({ messages = [], channelId }) {
           key={message.id} 
           message={message}
           channelId={channelId}
+          onReplyClick={() => onReplyClick(message.id)}
         />
       ))}
     </div>

@@ -5,8 +5,11 @@ import MessageItem from './MessageItem';
 import MessageInput from './MessageInput';
 import '../../styles/messages.css';
 
-function ReplyThread() {
-  const { channelId, messageId } = useParams();
+function ReplyThread({ messageId: propMessageId, channelId: propChannelId, onClose }) {
+  const { channelId: urlChannelId, messageId: urlMessageId } = useParams();
+  const channelId = propChannelId || urlChannelId;
+  const messageId = propMessageId || urlMessageId;
+  
   const [parentMessage, setParentMessage] = useState(null);
   const [replies, setReplies] = useState([]);
   const [error, setError] = useState(null);
@@ -24,13 +27,6 @@ function ReplyThread() {
           const data = await response.json();
           setParentMessage(data);
           document.title = `Thread: ${data.content.substring(0, 30)}... - Belay`;
-          navigate(`/channels/${channelId}/thread/${messageId}`, {
-            replace: true,
-            state: { 
-              parentMessageContent: data.content,
-              channelId: channelId
-            }
-          });
         }
       } catch (error) {
         console.error('Error fetching parent message:', error);
@@ -57,28 +53,26 @@ function ReplyThread() {
     fetchReplies();
     const pollInterval = setInterval(fetchReplies, 500);
     return () => clearInterval(pollInterval);
-  }, [channelId, messageId, navigate]);
+  }, [channelId, messageId]);
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      navigate(`/channels/${channelId}`);
+    }
+  };
 
   if (!channelId || !messageId) {
     return <div>Invalid thread</div>;
   }
 
   return (
-    <div className="reply-thread">
-      <div className="thread-header">
-        <button 
-          className="close-thread"
-          onClick={() => navigate(`/channels/${channelId}`)}
-        >
-          ✕
-        </button>
-        <h3>Thread</h3>
-      </div>
-
+    <div className="thread-container">
       {error && <div className="error-message">{error}</div>}
 
       {parentMessage && (
-        <div className="parent-message">
+        <div className="thread-parent-message">
           <MessageItem 
             message={parentMessage} 
             channelId={channelId}
@@ -86,7 +80,7 @@ function ReplyThread() {
         </div>
       )}
 
-      <div className="replies-list">
+      <div className="thread-replies">
         {replies.map(reply => (
           <MessageItem 
             key={reply.id} 
@@ -97,7 +91,13 @@ function ReplyThread() {
         ))}
       </div>
 
-      <MessageInput channelId={channelId} replyTo={messageId} />
+      <div className="thread-input">
+        <MessageInput 
+          channelId={channelId} 
+          replyTo={messageId}
+          placeholder="Reply in thread..."
+        />
+      </div>
     </div>
   );
 }

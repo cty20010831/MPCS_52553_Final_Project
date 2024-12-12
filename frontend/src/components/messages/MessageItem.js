@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { authFetch } from '../../utils/api';
 import '../../styles/messages.css';
 
-function MessageItem({ message, channelId, isReply = false }) {
+function MessageItem({ message, channelId, isReply = false, onReplyClick }) {
   const [showReactions, setShowReactions] = useState(false);
   const [reactions, setReactions] = useState(Array.isArray(message.reactions) ? message.reactions : []);
   const [error, setError] = useState('');
@@ -118,7 +118,6 @@ function MessageItem({ message, channelId, isReply = false }) {
       
       <div className="message-actions">
         <div className="action-buttons">
-          {/* Add reaction button and Reply button in the same line */}
           <button 
             className="reaction-button"
             onClick={() => setShowReactions(!showReactions)}
@@ -127,16 +126,15 @@ function MessageItem({ message, channelId, isReply = false }) {
             😊
           </button>
 
-          <Link 
-            to={`/channels/${channelId}/thread/${message.id}`}
+          <button 
             className="reply-button"
+            onClick={() => onReplyClick && onReplyClick(message.id)}
             title="Reply in Thread"
           >
             💬 {message.reply_count > 0 && <span className="reply-count">{message.reply_count}</span>}
-          </Link>
+          </button>
         </div>
 
-        {/* Emoji picker */}
         {showReactions && (
           <div className="reaction-picker">
             {['👍', '❤️', '😂', '🎉', '🤔', '👀', '👎'].map(emoji => (
@@ -151,7 +149,6 @@ function MessageItem({ message, channelId, isReply = false }) {
           </div>
         )}
 
-        {/* Display existing reactions */}
         <div className="message-reactions">
           {reactions.map(reaction => (
             <button 

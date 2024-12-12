@@ -449,3 +449,55 @@
   font-size: 18px;
   font-style: italic;
 }
+
+/* Add these styles for the thread panel */
+.thread-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: white;
+}
+
+.thread-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f8f8;
+}
+
+.thread-header h3 {
+  margin: 0;
+}
+
+.close-thread {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.close-thread:hover {
+  background-color: #e5e5e5;
+}
+
+.thread-parent-message {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f8f8;
+}
+
+.thread-replies {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.thread-input {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  background-color: white;
+}

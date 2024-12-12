@@ -339,3 +339,107 @@
   align-items: center;
   gap: 8px;
 }
+
+/* Main content layout */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar (first column) */
+.sidebar {
+  width: 260px;
+  background-color: #19171D;
+  color: #CCC;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+/* Channel list styles */
+.channel-list li.active {
+  background-color: #4A154B !important;  /* Keep your purple highlight */
+}
+
+.channel-list li:hover {
+  background-color: rgba(74, 21, 75, 0.2);
+}
+
+.channel-list li.active .channel-link,
+.channel-list li.active .channel-name,
+.channel-list li.active .channel-actions button {
+  color: white !important;
+}
+
+/* Content area (includes both messages and thread) */
+.content {
+  display: flex;
+  flex: 1;
+  background-color: white;
+  overflow: hidden;
+}
+
+/* Channel messages column */
+.channel-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid #ddd;
+  overflow: hidden;
+}
+
+/* Message list container */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  height: calc(100vh - 130px);
+}
+
+/* Message input area */
+.message-input {
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  background-color: white;
+}
+
+/* Thread panel */
+.thread-panel {
+  width: 400px;
+  border-left: 1px solid #ddd;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Thread header */
+.thread-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f8f8;
+}
+
+.thread-header button {
+  padding: 0.5rem 1rem;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Channel header */
+.channel-header {
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f8f8;
+}
+
+.channel-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
