@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { authFetch } from '../../utils/api';
 import NewChannel from './NewChannel';
 import '../../styles/channels.css';
@@ -9,10 +9,11 @@ function ChannelList() {
   const [channels, setChannels] = useState([]);
   const [unreadCounts, setUnreadCounts] = useState({});
   const [error, setError] = useState(null);
-  const { channelId } = useParams();
   const [editingChannel, setEditingChannel] = useState(null);
   const [newName, setNewName] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentChannelId = location.pathname.split('/').pop();
 
   const fetchChannels = async () => {
     try {
@@ -27,12 +28,10 @@ function ChannelList() {
     }
   };
 
-  // Fetch channels on component mount
   useEffect(() => {
     fetchChannels();
   }, []);
 
-  // Fetch unread counts
   useEffect(() => {
     const fetchUnreadCounts = async () => {
       try {
@@ -73,9 +72,7 @@ function ChannelList() {
       if (response.ok) {
         toast.success('Channel updated successfully');
         setEditingChannel(null);
-        // Force refresh of channels
         fetchChannels();
-        // Emit an event to notify channel name change
         window.dispatchEvent(new CustomEvent('channelNameUpdated', {
           detail: { channelId, newName }
         }));
@@ -95,11 +92,8 @@ function ChannelList() {
 
       if (response.ok) {
         toast.success('Channel deleted successfully');
-        // Navigate to home if we're in the deleted channel
         navigate('/');
-        // Refresh channels list
         fetchChannels();
-        // Dispatch event for other components
         window.dispatchEvent(new CustomEvent('channelDeleted', {
           detail: { channelId }
         }));
@@ -120,7 +114,7 @@ function ChannelList() {
 
       <ul>
         {channels.map(channel => (
-          <li key={channel.id} className={channel.id === parseInt(channelId) ? 'active' : ''}>
+          <li key={channel.id} className={channel.id === Number(currentChannelId) ? 'active' : ''}>
             {editingChannel?.id === channel.id ? (
               <div className="channel-edit-form">
                 <input
