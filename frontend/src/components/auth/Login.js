@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import '../../styles/auth.css';
+import { toast } from 'react-toastify';
 
 function Login({ setIsAuthenticated }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
@@ -13,41 +15,45 @@ function Login({ setIsAuthenticated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username, password })
-        });
+      const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log('Login response:', data); // Debug log
-            localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
-            localStorage.setItem('tianyuec_belay_username', data.username);
-            console.log('Stored username:', localStorage.getItem('tianyuec_belay_username')); // Debug log
-            setIsAuthenticated(true);
-            navigate('/', { replace: true });
-        } else {
-            setError('Invalid credentials');
-        }
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
+        localStorage.setItem('username', data.username);
+        setIsAuthenticated(true);
+        toast.success('Logged in successfully!');
+        
+        // Get the saved redirect path and navigate
+        const redirectPath = localStorage.getItem('redirectPath');
+        navigate(redirectPath || '/');
+        localStorage.removeItem('redirectPath'); // Clean up after redirect
+      } else {
+        toast.error(data.message || 'Login failed');
+      }
     } catch (error) {
-        setError('Login failed');
+      console.error('Login error:', error);
+      toast.error('Login failed');
     }
-};
+  };
 
   return (
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
         <h2>Login to Belay</h2>
-        {error && <div className="error-message">{error}</div>}
         <div className="form-group">
           <input
             type="text"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
           />
         </div>
@@ -55,8 +61,8 @@ function Login({ setIsAuthenticated }) {
           <input
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             required
           />
         </div>

@@ -463,64 +463,48 @@ def remove_reaction(user_id, message_id):
 @handle_options
 @auth_required
 def get_unread_counts(user_id):
-    try:
-        unread_counts = query_db('''
-            WITH LastRead AS (
-                SELECT channel_id, last_read_message_id
-                FROM message_reads
-                WHERE user_id = ?
-            )
-            SELECT 
-                c.id as channel_id,
-                c.name as channel_name,
-                COUNT(CASE 
-                    WHEN m.id > COALESCE(lr.last_read_message_id, 0) 
-                    THEN 1 
-                    END
-                ) as unread_count
-            FROM channels c
-            LEFT JOIN messages m ON c.id = m.channel_id
-            LEFT JOIN LastRead lr ON c.id = lr.channel_id
-            GROUP BY c.id, c.name
-        ''', [user_id])
-        
-        return jsonify([dict(count) for count in unread_counts])
-        
-    except Exception as e:
-        print(f"Error getting unread counts: {e}")
-        return jsonify({'error': 'Failed to get unread counts'}), 500
+    unread_counts = query_db('''
+        WITH LastRead AS (
+            SELECT channel_id, last_read_message_id
+            FROM message_reads
+            WHERE user_id = ?
+        )
+        SELECT 
+            c.id as channel_id,
+            COUNT(CASE 
+                WHEN m.id > COALESCE(lr.last_read_message_id, 0) 
+                THEN 1 
+                END
+            ) as unread_count
+        FROM channels c
+        LEFT JOIN messages m ON c.id = m.channel_id
+        LEFT JOIN LastRead lr ON c.id = lr.channel_id
+        GROUP BY c.id
+    ''', [user_id])
+    
+    return jsonify(unread_counts), 200
 
 @app.route('/api/channels/<int:channel_id>/read', methods=['OPTIONS', 'POST'])
 @handle_options
 @auth_required
 def mark_channel_read(user_id, channel_id):
-    try:
-        # Get the latest message ID in the channel
-        latest_message = query_db('''
-            SELECT id 
-            FROM messages 
-            WHERE channel_id = ? 
-            ORDER BY id DESC LIMIT 1
-        ''', [channel_id], one=True)
-        
-        if latest_message:
-            # Update or insert the read status
-            query_db('''
-                INSERT OR REPLACE INTO message_reads 
-                (user_id, channel_id, last_read_message_id, last_read_at) 
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-            ''', [user_id, channel_id, latest_message['id']])
-            
-            return jsonify({
-                'message': 'Channel marked as read',
-                'last_read_message_id': latest_message['id']
-            })
-        
-        return jsonify({'message': 'No messages in channel'})
-        
-    except Exception as e:
-        print(f"Error marking channel as read: {e}")
-        return jsonify({'error': 'Failed to mark channel as read'}), 500
+    # Get the latest message ID for the channel
+    latest_message = query_db('''
+        SELECT id FROM messages 
+        WHERE channel_id = ? 
+        ORDER BY id DESC LIMIT 1
+    ''', [channel_id], one=True)
+    
+    if latest_message:
+        # Update or insert the read status
+        query_db('''
+            INSERT INTO message_reads (user_id, channel_id, last_read_message_id)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id, channel_id) 
+            DO UPDATE SET last_read_message_id = ?
+        ''', [user_id, channel_id, latest_message['id'], latest_message['id']])
+    
+    return jsonify({'status': 'success'}), 200
 
 # Update channel
 @app.route('/api/channels/<int:channel_id>', methods=['OPTIONS', 'PUT'])

@@ -1,33 +1,44 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../../styles/auth.css';
+import { toast } from 'react-toastify';
 
 function Signup({ setIsAuthenticated }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch('http://127.0.0.1:5000/api/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
+        localStorage.setItem('tianyuec_belay_auth_token', data.token);
         setIsAuthenticated(true);
-        navigate('/');
+        toast.success('Signed up successfully!');
+        
+        // Get the saved redirect path and navigate
+        const redirectPath = localStorage.getItem('redirectPath');
+        navigate(redirectPath || '/');
+        localStorage.removeItem('redirectPath'); // Clean up after redirect
       } else {
-        setError(data.message);
+        toast.error(data.message || 'Signup failed');
       }
     } catch (error) {
-      setError('Signup failed. Please try again.');
+      console.error('Signup error:', error);
+      toast.error('Signup failed');
     }
   };
 
@@ -35,13 +46,12 @@ function Signup({ setIsAuthenticated }) {
     <div className="auth-container">
       <form onSubmit={handleSubmit} className="auth-form">
         <h2>Create Account</h2>
-        {error && <div className="error-message">{error}</div>}
         <div className="form-group">
           <input
             type="text"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
             required
           />
         </div>
@@ -49,8 +59,17 @@ function Signup({ setIsAuthenticated }) {
           <input
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
             required
           />
         </div>

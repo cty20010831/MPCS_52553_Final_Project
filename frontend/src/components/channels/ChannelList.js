@@ -39,11 +39,10 @@ function ChannelList() {
         const response = await authFetch('http://127.0.0.1:5000/api/channels/unread');
         if (response.ok) {
           const data = await response.json();
-          const counts = {};
-          data.forEach(item => {
-            counts[item.channel_id] = item.unread_count;
-          });
-          setUnreadCounts(counts);
+          setUnreadCounts(data.reduce((acc, curr) => {
+            acc[curr.channel_id] = curr.unread_count;
+            return acc;
+          }, {}));
         }
       } catch (error) {
         console.error('Error fetching unread counts:', error);
@@ -51,9 +50,9 @@ function ChannelList() {
     };
 
     fetchUnreadCounts();
-    const unreadPollInterval = setInterval(fetchUnreadCounts, 5000);
-    return () => clearInterval(unreadPollInterval);
-  }, [channelId]); // Update when channel changes
+    const interval = setInterval(fetchUnreadCounts, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleNewChannel = (newChannel) => {
     setChannels(prev => [...prev, newChannel]);
@@ -135,7 +134,12 @@ function ChannelList() {
               </div>
             ) : (
               <Link to={`/channels/${channel.id}`} className="channel-link">
-                <span className="channel-name">#{channel.name}</span>
+                <span className="channel-name">
+                  #{channel.name}
+                  {unreadCounts[channel.id] > 0 && (
+                    <span className="unread-badge">{unreadCounts[channel.id]}</span>
+                  )}
+                </span>
                 <div className="channel-actions">
                   <button 
                     className="channel-action-btn edit"

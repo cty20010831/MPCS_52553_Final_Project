@@ -16,37 +16,34 @@ function AppContent() {
     !!localStorage.getItem('tianyuec_belay_auth_token')
   );
 
+  // If user is not authenticated and tries to access a protected route,
+  // save that route to localStorage
   useEffect(() => {
-    console.log('Auth state changed:', isAuthenticated);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    // Update document title based on route and state
-    if (location.pathname === '/') {
-      document.title = 'Belay';
-    } else if (location.state?.channelName) {
-      document.title = `#${location.state.channelName} - Belay`;
-    } else if (location.state?.parentMessageContent) {
-      document.title = `Thread: ${location.state.parentMessageContent.substring(0, 30)}... - Belay`;
+    if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup') {
+      localStorage.setItem('redirectPath', location.pathname);
     }
-  }, [location]);
+  }, [location, isAuthenticated]);
 
   return (
     <Routes>
       <Route 
         path="/login" 
         element={
-          isAuthenticated ? 
-            <Navigate to="/" replace /> : 
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
             <Login setIsAuthenticated={setIsAuthenticated} />
+          )
         } 
       />
       <Route 
         path="/signup" 
         element={
-          isAuthenticated ? 
-            <Navigate to="/" replace /> : 
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
             <Signup setIsAuthenticated={setIsAuthenticated} />
+          )
         } 
       />
       <Route
@@ -69,7 +66,14 @@ function AppContent() {
   );
 }
 
+// Clean up the redirectPath after successful login/signup
 function App() {
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('redirectPath');
+    };
+  }, []);
+
   return (
     <>
       <BrowserRouter>
