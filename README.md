@@ -44,5 +44,5 @@ npm start
 
 If everything is set up correctly, you should be able to access the app at `http://127.0.0.1:3000`.
 
-## Note on Using `flask_cors` Package
+### Note on Using `flask_cors` Package
 In this project, I included the `flask_cors` package to enable secure communication between the React frontend running on `localhost:3000` and the Flask backend running on a different port. Without CORS, web browsers would block these cross-origin requests due to security policies. The configuration explicitly allows specific HTTP methods (GET, POST, PUT, DELETE) and headers (Content-Type, Authorization) needed for the application's functionality, while maintaining security by only permitting requests from the trusted frontend origin. This setup is particularly crucial for supporting features like user authentication and data management across the separated frontend and backend architecture.
