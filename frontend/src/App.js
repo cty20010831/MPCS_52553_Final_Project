@@ -15,6 +15,7 @@ function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem('tianyuec_belay_auth_token')
   );
+  const isMobile = window.innerWidth <= 768;
 
   // If user is not authenticated and tries to access a protected route,
   // save that route to localStorage
@@ -22,7 +23,7 @@ function AppContent() {
     if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup') {
       localStorage.setItem('redirectPath', location.pathname);
     }
-  }, [location, isAuthenticated]);
+  }, [location.pathname, isAuthenticated]);
 
   return (
     <Routes>
@@ -54,7 +55,13 @@ function AppContent() {
               <Routes>
                 <Route path="/channels/:channelId" element={<ChannelView />} />
                 <Route path="/channels/:channelId/thread/:messageId" element={<ReplyThread />} />
-                <Route path="/" element={<div className="welcome-message">Select a channel to start messaging</div>} />
+                {!isMobile && (
+                  <Route path="/" element={
+                    <div className="welcome-message">
+                      Select a channel to start messaging
+                    </div>
+                  } />
+                )}
               </Routes>
             </Layout>
           ) : (

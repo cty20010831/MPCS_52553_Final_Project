@@ -13,6 +13,7 @@ function ChannelView() {
     const [messages, setMessages] = useState([]);
     const [error, setError] = useState(null);
     const [selectedMessageId, setSelectedMessageId] = useState(null);
+    const isMobile = window.innerWidth <= 768;
 
     // Fetch channel details
     useEffect(() => {
@@ -135,6 +136,14 @@ function ChannelView() {
     return (
         <div className="content">
             <div className="channel-messages">
+                {isMobile && (
+                    <button 
+                        className="mobile-nav-button"
+                        onClick={() => navigate('/')}
+                    >
+                        ← Channels
+                    </button>
+                )}
                 <div className="channel-header">
                     <h2>#{channel?.name}</h2>
                 </div>
@@ -150,7 +159,7 @@ function ChannelView() {
             </div>
             
             {selectedMessageId && (
-                <div className="thread-panel">
+                <div className={`thread-panel ${isMobile ? 'show' : ''}`}>
                     <div className="thread-header">
                         <h3>Thread</h3>
                         <button onClick={handleCloseThread}>Close</button>

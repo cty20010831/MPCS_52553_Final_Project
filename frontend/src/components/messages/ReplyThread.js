@@ -14,6 +14,7 @@ function ReplyThread({ messageId: propMessageId, channelId: propChannelId, onClo
   const [replies, setReplies] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const isMobile = window.innerWidth <= 768;
 
   useEffect(() => {
     if (!channelId || !messageId) return;
@@ -69,6 +70,14 @@ function ReplyThread({ messageId: propMessageId, channelId: propChannelId, onClo
 
   return (
     <div className="thread-container">
+      {isMobile && (
+        <button 
+          className="mobile-nav-button"
+          onClick={handleClose}
+        >
+          ← Back to Channel
+        </button>
+      )}
       {error && <div className="error-message">{error}</div>}
 
       {parentMessage && (

@@ -45,6 +45,19 @@
   transition: transform 0.2s ease;
 }
 
+/* Welcome message styling */
+.welcome-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: white;
+  color: #666;
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+}
+
 /* Dropdown menu styling */
 .dropdown-menu {
   position: absolute;
@@ -442,4 +455,80 @@
 .channel-header h2 {
   margin: 0;
   font-size: 1.2rem;
+}
+
+/* Mobile styles - add at the end of your existing CSS */
+@media (max-width: 768px) {
+  .main-content {
+    position: relative;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px; /* Account for header height */
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+  }
+
+  .content {
+    width: 100%;
+  }
+
+  .thread-panel {
+    position: fixed;
+    right: 0;
+    top: 60px;
+    bottom: 0;
+    width: 100%;
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .thread-panel.show {
+    transform: translateX(0);
+  }
+
+  /* Mobile navigation buttons */
+  .mobile-nav-button {
+    display: block;
+    padding: 8px 16px;
+    background-color: #4A154B;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    margin: 8px;
+    cursor: pointer;
+  }
+
+  /* Adjust header for mobile */
+  .header {
+    padding: 0 10px;
+  }
+
+  .header-title {
+    font-size: 20px;
+  }
+}
+
+/* Hide mobile elements on desktop */
+@media (min-width: 769px) {
+  .mobile-nav-button {
+    display: none;
+  }
+
+  .sidebar,
+  .thread-panel {
+    transform: none !important;
+    position: relative !important;
+    top: auto !important;
+  }
 }
