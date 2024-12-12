@@ -49,7 +49,7 @@ function ChannelList() {
     };
 
     fetchUnreadCounts();
-    const interval = setInterval(fetchUnreadCounts, 5000);
+    const interval = setInterval(fetchUnreadCounts, 500);
     return () => clearInterval(interval);
   }, []);
 
