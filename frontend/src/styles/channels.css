@@ -228,3 +228,24 @@
 .channel-list::-webkit-scrollbar-thumb:hover {
   background-color: #2f3136;
 }
+
+@media (max-width: 768px) {
+  .channel-list {
+    width: 100%; /* Override the fixed 240px width */
+    height: calc(100vh - 60px); /* Adjust for header height */
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .channel-list ul {
+    width: 100%;
+  }
+
+  .channel-list li {
+    margin: 2px 0; /* Remove horizontal margins */
+    padding: 4px 16px; /* Add more horizontal padding */
+  }
+}
