@@ -27,7 +27,7 @@ function Login({ setIsAuthenticated }) {
 
       if (response.ok) {
         localStorage.setItem('tianyuec_belay_auth_token', data.auth_token);
-        localStorage.setItem('username', data.username);
+        localStorage.setItem('tianyuec_belay_username', data.username);
         setIsAuthenticated(true);
         toast.success('Logged in successfully!');
         
