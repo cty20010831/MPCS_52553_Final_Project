@@ -15,18 +15,21 @@ function MessageItem({ message, channelId, isReply = false }) {
   }, [message.reactions]);
 
   const renderContent = () => {
-    const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|gif|png))/gi;
-    const parts = message.content.split(urlRegex);
-    const matches = message.content.match(urlRegex) || [];
-
+    const urlRegex = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|gif|png)(?:[?][^\s]*)?)/gi;
+    const imageUrls = message.content.match(urlRegex) || [];
+    const textContent = message.content.replace(urlRegex, '').trim();
+  
     return (
-      <>
-        {parts.map((part, i) => (
-          matches.includes(part) ? 
-            <img key={i} src={part} alt="" className="message-image" /> : 
-            <span key={i}>{part}</span>
-        ))}
-      </>
+      <div className="message-content-wrapper">
+        {textContent && <div className="text-content">{textContent}</div>}
+        {imageUrls.length > 0 && (
+          <div className="images-wrapper">
+            {imageUrls.map((url, i) => (
+              <img key={i} src={url} alt="" className="message-image" />
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 

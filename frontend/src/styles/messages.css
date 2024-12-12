@@ -105,11 +105,22 @@
   z-index: 1;
 }
 
+.message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.images-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;  /* Increased gap between images */
+}
+
 .message-image {
-  max-width: 300px;
-  max-height: 300px;
-  border-radius: 4px;
-  margin: 4px 0;
+  max-width: 400px;  /* Optional: limit maximum width of images */
+  width: fit-content;
+  display: block;  /* Ensures each image is on its own line */
 }
 
 /* Message Reactions */
