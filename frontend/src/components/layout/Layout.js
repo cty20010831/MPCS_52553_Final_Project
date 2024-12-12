@@ -4,9 +4,10 @@ import Header from './Header';
 import ChannelList from '../channels/ChannelList';
 
 function Layout({ children, setIsAuthenticated }) {
-  const [showSidebar, setShowSidebar] = useState(window.innerWidth > 768);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [showThread, setShowThread] = useState(false);
   const location = useLocation();
+  const isMobile = window.innerWidth <= 768;
 
   // Handle window resize
   useEffect(() => {
@@ -19,17 +20,18 @@ function Layout({ children, setIsAuthenticated }) {
 
   // Handle route changes
   useEffect(() => {
-    if (window.innerWidth <= 768) {
+    if (isMobile) {
       const isThreadRoute = location.pathname.includes('/thread/');
+      const isChannelRoute = location.pathname.includes('/channels/');
       setShowThread(isThreadRoute);
-      setShowSidebar(!isThreadRoute && !location.pathname.includes('/channels/'));
+      setShowSidebar(!isThreadRoute && !isChannelRoute);
     }
-  }, [location]);
+  }, [location, isMobile]);
 
   return (
     <div className="app-container">
       <Header setIsAuthenticated={setIsAuthenticated}>
-        {window.innerWidth <= 768 && (
+        {isMobile && (
           <button 
             className="mobile-nav-button"
             onClick={() => setShowSidebar(!showSidebar)}
@@ -41,14 +43,6 @@ function Layout({ children, setIsAuthenticated }) {
       <div className="main-content">
         <div className={`sidebar ${showSidebar ? 'show' : ''}`}>
           <ChannelList />
-          {window.innerWidth <= 768 && (
-            <button 
-              className="mobile-nav-button"
-              onClick={() => setShowSidebar(false)}
-            >
-              Close
-            </button>
-          )}
         </div>
         <main className="channel-content">
           {children}
